@@ -1,0 +1,38 @@
+version: "1"
+services:
+  ray-head:
+    image: rayproject/ray
+    ports:
+      - "${REDISPORT}:${REDISPORT}"
+      - "${DASHBOARDPORT}:${DASHBOARDPORT}"
+    env_file:
+     - .env
+    command: bash -c "ray start --head --dashboard-port=${DASHBOARDPORT} --port=${REDISPORT} --dashboard-host=0.0.0.0 --redis-password=${REDISPASSWORD} && sleep infinity"
+    shm_size: 2g
+    networks:
+      - ray_net
+
+  ray-worker1:
+    image: rayproject/ray
+    env_file:
+     - .env
+    command: bash -c "ray start --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} && sleep infinity"
+    shm_size: 2g
+    networks:
+     - ray_net
+  
+  ray-worker2:
+    image: rayproject/ray
+    env_file:
+     - .env
+    command: bash -c "ray start --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} && sleep infinity"
+    shm_size: 2g
+    networks:
+     - ray_net
+
+networks:
+  ray_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.63.0.0/16
