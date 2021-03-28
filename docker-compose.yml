@@ -1,32 +1,44 @@
 version: "1"
 services:
   ray-head:
-    image: rayproject/ray
+    image: ${RAY_IMAGE}
     ports:
       - "${REDISPORT}:${REDISPORT}"
       - "${DASHBOARDPORT}:${DASHBOARDPORT}"
     env_file:
      - .env
-    command: bash -c "ray start --head --dashboard-port=${DASHBOARDPORT} --port=${REDISPORT} --dashboard-host=0.0.0.0 --redis-password=${REDISPASSWORD} && sleep infinity"
+    command: bash -c "ray start --head --dashboard-port=${DASHBOARDPORT} --port=${REDISPORT} --dashboard-host=0.0.0.0 --redis-password=${REDISPASSWORD} --num-cpus=1 && sleep infinity"
     shm_size: 2g
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
     networks:
       - ray_net
 
   ray-worker1:
-    image: rayproject/ray
+    image: ${RAY_IMAGE}
     env_file:
      - .env
-    command: bash -c "ray start --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} && sleep infinity"
+    command: bash -c "ray start --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} --num-cpus=2 && sleep infinity"
     shm_size: 2g
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
     networks:
      - ray_net
   
   ray-worker2:
-    image: rayproject/ray
+    image: ${RAY_IMAGE}
     env_file:
      - .env
-    command: bash -c "ray start --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} && sleep infinity"
+    command: bash -c "ray start --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} --num-cpus=2 && sleep infinity"
     shm_size: 2g
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
     networks:
      - ray_net
 
