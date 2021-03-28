@@ -7,7 +7,7 @@ services:
       - "${DASHBOARDPORT}:${DASHBOARDPORT}"
     env_file:
      - .env
-    command: bash -c "ray start --head --dashboard-port=${DASHBOARDPORT} --port=${REDISPORT} --dashboard-host=0.0.0.0 --redis-password=${REDISPASSWORD} --num-cpus=1 && sleep infinity"
+    command: bash -c "ray start --head --node-name=ray-head --dashboard-port=${DASHBOARDPORT} --port=${REDISPORT} --dashboard-host=0.0.0.0 --redis-password=${REDISPASSWORD} --num-cpus=1 && sleep infinity"
     shm_size: 2g
     deploy:
       resources:
@@ -20,7 +20,7 @@ services:
     image: ${RAY_IMAGE}
     env_file:
      - .env
-    command: bash -c "ray start --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} --num-cpus=2 && sleep infinity"
+    command: bash -c "ray start --node-name=worker1 --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} --num-cpus=2 && sleep infinity"
     shm_size: 2g
     deploy:
       resources:
@@ -33,7 +33,7 @@ services:
     image: ${RAY_IMAGE}
     env_file:
      - .env
-    command: bash -c "ray start --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} --num-cpus=2 && sleep infinity"
+    command: bash -c "ray start --node-name=worker2 --address=ray-head:${REDISPORT} --redis-password=${REDISPASSWORD} --num-cpus=2 && sleep infinity"
     shm_size: 2g
     deploy:
       resources:
